@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "com.deptagency.sqlexplain.enabled",
+  "type": "java.lang.String",
+  "description": "Boolean property true or false if to enable running and logging explain plans for queries'"
+}]}
