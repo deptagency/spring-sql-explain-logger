@@ -37,8 +37,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         this.databaseDialect = databaseDialect;
     }
 
-    
-    /** 
+    /**
      * @param execInfo
      * @param queryInfoList
      */
@@ -48,9 +47,9 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     }
 
-    
-    /** 
+    /**
      * Get the query details and run an explain plan and log the results
+     * 
      * @param execInfo
      * @param queryInfoList
      */
@@ -61,22 +60,26 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
             QueryInfo queryInfo = queryInfoList.get(0);
             if (isQueryTypeSupported(queryInfo.getQuery())) {
                 ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
-                
+
                 if (execInfo.getStatementType() == StatementType.PREPARED) {
 
                     List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
                     List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(paramList);
 
+                    // Execute Explain Plan
                     Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
                             .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
 
+                    // Log results if present
                     queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
                             results.toString(), logger));
                 } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
+                    // Execute Explain Plan
                     Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
                             .executeExplainPlan(queryInfo.getQuery(), queryCreator);
 
-                    //TODO better resutls formatting (posibbly move formating to logger class)
+                    // TODO better resutls formatting (posibbly move formating to logger class)
+                    // Log results if present
                     queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
                             results.toString(), logger));
                 }
@@ -88,9 +91,9 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     }
 
-    
-    /** 
+    /**
      * Check if the type of query SELECT, INSERT etc is supported
+     * 
      * @param query to check if type is supported by the explain query logger
      * @return Boolean if query is supported
      */
@@ -99,8 +102,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         return SUPPORTED_QUERY_TYPES.contains(queryType);
     }
 
-    
-    /** 
+    /**
      * @param params
      * @return List<PreparedStetementValue>
      */

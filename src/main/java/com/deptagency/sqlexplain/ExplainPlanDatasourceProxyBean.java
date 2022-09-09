@@ -28,7 +28,8 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 
     Logger logger = LoggerFactory.getLogger(ExplainPlanDatasourceProxyBean.class);
 
-    //TODO change to a better option to look at the datasource itself instead of relying on the config property
+    // TODO change to a better option to look at the datasource itself instead of
+    // relying on the config property
     @Value("${spring.datasource.url}")
     private String jdbcURL;
 
@@ -39,16 +40,18 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
-        //TODO add check for database dialect and warning for none supported databases
+        // TODO add check for database dialect and warning for none supported databases
         if (bean instanceof DataSource) {
             Optional<DatabaseDialect> dbDialect = DatabaseDialect.getDatabaseDialectByURL(jdbcURL);
+
             if (dbDialect.isPresent() && dbDialect.get().isSupported()) {
                 ProxyFactory factory = new ProxyFactory(bean);
                 factory.setProxyTargetClass(true);
                 factory.addAdvice(new ProxyDataSourceInterceptor((DataSource) bean, dbDialect.get()));
                 return factory.getProxy();
             } else {
-                logger.warn("WARN database is not currently supported ");
+                logger.warn("WARN database is not currently supported. Currently supported databases include {} ",
+                        DatabaseDialect.getSupportedDatabases());
             }
         }
         return bean;
@@ -60,8 +63,8 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
         public ProxyDataSourceInterceptor(final DataSource dataSource, final DatabaseDialect dialect) {
             super();
             this.dataSource = ProxyDataSourceBuilder.create(dataSource)
-                    //.countQuery()
-                    //.logQueryBySlf4j(SLF4JLogLevel.INFO)
+                    // .countQuery()
+                    // .logQueryBySlf4j(SLF4JLogLevel.INFO)
                     .listener(new LogExplainPlanQueryListener(dialect))
                     .build();
         }
