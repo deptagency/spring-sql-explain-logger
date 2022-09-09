@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.hibernate.engine.query.spi.QueryPlanCache.QueryPlanCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -24,19 +25,17 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
   
   /** 
    * Run explain plan for a query and return the results
-   * The results will be mapped to a List (one entry for each row)
+   * The results will be mapped to a List (one entry for each row) of Maps (one entry for each column using the column name as the key).
    * @param query to run explian plan for
    * @return Optional<List<String>> Explain plan results
    */
-  public Optional<List<Map<String, Object>>> executeExplainPlan(String query) {
+  public Optional<List<Map<String, Object>>> executeExplainPlan(String query, ExplainPlanQueryCreator queryCreator) {
 
     List<Map<String, Object>> results = null;
     try {
 
-      // TODO get explain plan query based on database dialect
-      ExplainPlanQueryCreator exp = new PostgreSqlExplainPlanQueryCreator();
       // TODO add logic to only run explain plan per query periodically
-      String explainQuery = exp.getExlainPlanQuery(query);
+      String explainQuery = queryCreator.getExlainPlanQuery(query);
 
       JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
@@ -61,17 +60,16 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * @return Optional<List<Map<String, Object>>> Explain plan results
    */
   public Optional<List<Map<String, Object>>> executeExplainPlan(String query,
-      List<PreparedStetementValue> preparedStetementValues) {
+      List<PreparedStetementValue> preparedStetementValues, ExplainPlanQueryCreator queryCreator ) {
 
     List<Map<String, Object>> results = null;
     try {
-      // TODO get explain plan query based on database dialect
-      ExplainPlanQueryCreator exp = new PostgreSqlExplainPlanQueryCreator();
-      String explainQuery = exp.getExlainPlanQuery(query);
+      //TODO find another way to get bean if possible
+      JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
+
+      String explainQuery = queryCreator.getExlainPlanQuery(query);
 
       Object[] args = preparedStetementValues.stream().map(value -> value.getValue()).toArray();
-
-      JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
       results = jdbcTemplate.queryForList(explainQuery, args);
       return Optional.of(results);

@@ -30,7 +30,10 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         }
     };
 
-    public LogExplainPlanQueryListener() {
+    protected DatabaseDialect databaseDialect;
+
+    public LogExplainPlanQueryListener(DatabaseDialect databaseDialect) {
+        this.databaseDialect = databaseDialect;
     }
 
     
@@ -60,12 +63,12 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
                     List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
                     List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(paramList);
                     Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues);
+                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, databaseDialect.getExplainPlanQueryCreator());
                     queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
                             results.toString(), logger));
                 } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
                     Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery());
+                            .executeExplainPlan(queryInfo.getQuery(), databaseDialect.getExplainPlanQueryCreator());
                     //TODO better resutls formatting (posibbly move formating to logger class)
                     queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
                             results.toString(), logger));

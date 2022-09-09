@@ -23,11 +23,15 @@ public class CustomerController {
 	@GetMapping("/customers")
 	public String customers() {
 
-		// Customer customer = new Customer("test_fn_insert", "test_save");
+		// Customer customer = new Customer("test_fn_insert", "test_save_d");
 		// repository.save(customer);
-		List<Customer> customers = repository.findByLastName("test_save");
+		List<Customer> customers = repository.findByLastName("test_save_d");
 
-		List<Customer> allCustomers = repository.findAll();
+		//List<Customer>  allCustomers = repository.findAll();
+
+		Customer customerd = repository.findById(1);
+
+		//allCustomers = repository.findAll();
 
 		return "Greetings from Spring Boot! " + customers;
 	}
