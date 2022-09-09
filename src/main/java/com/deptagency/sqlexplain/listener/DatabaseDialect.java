@@ -45,8 +45,7 @@ public enum DatabaseDialect {
     public boolean isSupported() {return supported;}
 
     public ExplainPlanQueryCreator getExplainPlanQueryCreator() {
-        //TODO find better solution
-        return null;
+        throw new UnsupportedOperationException("{} is not currently supported and doesn't have an explain plan query creator");
     }
 
     public static Optional<DatabaseDialect> getDatabaseDialectByURL(String jdbcURL) {
