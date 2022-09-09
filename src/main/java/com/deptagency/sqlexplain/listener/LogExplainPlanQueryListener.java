@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.deptagency.sqlexplain.PreparedStetementValue;
 import com.deptagency.sqlexplain.execute.ExplainPlanExecutor;
+import com.deptagency.sqlexplain.execute.ExplainPlanQueryCreator;
 import com.deptagency.sqlexplain.logger.ExplainPlanLogger;
 
 import net.ttddyy.dsproxy.ExecutionInfo;
@@ -59,16 +60,22 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         try {
             QueryInfo queryInfo = queryInfoList.get(0);
             if (isQueryTypeSupported(queryInfo.getQuery())) {
+                ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
+                
                 if (execInfo.getStatementType() == StatementType.PREPARED) {
+
                     List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
                     List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(paramList);
+
                     Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, databaseDialect.getExplainPlanQueryCreator());
+                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
+
                     queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
                             results.toString(), logger));
                 } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
                     Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery(), databaseDialect.getExplainPlanQueryCreator());
+                            .executeExplainPlan(queryInfo.getQuery(), queryCreator);
+
                     //TODO better resutls formatting (posibbly move formating to logger class)
                     queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
                             results.toString(), logger));
