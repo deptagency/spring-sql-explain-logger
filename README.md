@@ -1,17 +1,12 @@
 # DEPT SQL Explain
 SQL explain is an interceptor that outputs explain plans for sql queries.
 
-## Example outpot
+## Example Output
 
 ```json
 {
-"Query": "select customer0_.id as id1_0_0_, 
-            customer0_.first_name as first_na2_0_0_, 
-            customer0_.last_name as last_nam3_0_0_ 
-        from 
-            customer customer0_ where customer0_.id=?"  
-}
- [
+"Query": "select customer0_.id as id1_0_0_, customer0_.first_name as first_na2_0_0_, customer0_.last_name as last_nam3_0_0_ from customer customer0_ where customer0_.id=?" ,
+"Explain": [
   {
     "Plan": {
       "Node Type": "Seq Scan",
@@ -27,6 +22,7 @@ SQL explain is an interceptor that outputs explain plans for sql queries.
     }
   }
 ]
+}
 ```
 
 ## Maven
