@@ -30,7 +30,7 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 
     // TODO change to a better option to look at the datasource itself instead of
     // relying on the config property
-    @Value("${spring.datasource.url}")
+    @Value("${spring.datasource.url:null}")
     private String jdbcURL;
 
     @Override
@@ -40,7 +40,6 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
-        // TODO add check for database dialect and warning for none supported databases
         if (bean instanceof DataSource) {
             Optional<DatabaseDialect> dbDialect = DatabaseDialect.getDatabaseDialectByURL(jdbcURL);
 

@@ -17,7 +17,7 @@ import com.deptagency.sqlexplain.PreparedStetementValue;
 @Component
 public class ExplainPlanExecutor implements ApplicationContextAware {
 
-  Logger logger = LoggerFactory.getLogger(PostgreSqlExplainPlanQueryCreator.class);
+  Logger logger = LoggerFactory.getLogger(ExplainPlanExecutor.class);
 
   private static ApplicationContext applicationContext;
 
@@ -39,7 +39,6 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
       JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
       results = jdbcTemplate.queryForList(explainQuery);
-      return Optional.of(results);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -71,7 +70,6 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
       Object[] args = preparedStetementValues.stream().map(value -> value.getValue()).toArray();
 
       results = jdbcTemplate.queryForList(explainQuery, args);
-      return Optional.of(results);
 
     } catch (Exception e) {
       // TODO Auto-generated catch block

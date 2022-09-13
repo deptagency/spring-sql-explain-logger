@@ -63,13 +63,11 @@ public enum DatabaseDialect {
 
     public static Optional<DatabaseDialect> getDatabaseDialectByURL(String jdbcURL) {
         DatabaseDialect dbDialect = null;
-        if (jdbcURL == null) {
-            return Optional.ofNullable(null);
-        }
-
-        String[] splitStr = jdbcURL.split(":");
-        if (splitStr != null && splitStr.length >= 2) {
-            dbDialect = DBNAMEMAP.get(splitStr[1].toLowerCase());
+        if (jdbcURL != null) {
+            String[] splitStr = jdbcURL.split(":");
+            if (splitStr != null && splitStr.length >= 2) {
+                dbDialect = DBNAMEMAP.get(splitStr[1].toLowerCase());
+            }
         }
         return Optional.ofNullable(dbDialect);
     }

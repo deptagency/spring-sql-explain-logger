@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +23,12 @@ import net.ttddyy.dsproxy.listener.QueryExecutionListener;
 import net.ttddyy.dsproxy.listener.QueryUtils;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 
+
 public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     Logger logger = LoggerFactory.getLogger(LogExplainPlanQueryListener.class);
+
+    private final Integer EXPLAIN_QUERY_IMEOUT_MS = 500;
 
     public List<QueryType> SUPPORTED_QUERY_TYPES = new ArrayList<QueryType>() {
         {
@@ -55,34 +60,37 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
      */
     @Override
     public void afterQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
-        // TODO Make Async call
         try {
             QueryInfo queryInfo = queryInfoList.get(0);
             if (isQueryTypeSupported(queryInfo.getQuery())) {
-                ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
+                //TODO check performance and resource implications of using completable future and also handling exceptions
+                CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
+                    Optional<List<Map<String, Object>>> queryResults = null;
+                        ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
 
-                if (execInfo.getStatementType() == StatementType.PREPARED) {
+                        if (execInfo.getStatementType() == StatementType.PREPARED) {
 
-                    List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
-                    List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(paramList);
+                            List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
+                            List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(paramList);
 
-                    // Execute Explain Plan
-                    Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
+                            // Execute Explain Plan
+                            queryResults = new ExplainPlanExecutor()
+                                    .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
 
-                    // Log results if present
-                    queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
-                            results.toString(), logger));
-                } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
-                    // Execute Explain Plan
-                    Optional<List<Map<String, Object>>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery(), queryCreator);
+                            // Log results if present
+                            queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
+                                    results, logger));
+                        } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
+                            // Execute Explain Plan
+                            queryResults = new ExplainPlanExecutor()
+                                    .executeExplainPlan(queryInfo.getQuery(), queryCreator);
 
-                    // TODO better resutls formatting (posibbly move formating to logger class)
-                    // Log results if present
-                    queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
-                            results.toString(), logger));
-                }
+                            // TODO better resutls formatting (posibbly move formating to logger class)
+                            // Log results if present
+                            queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
+                                    results, logger));
+                        }
+                }).orTimeout(EXPLAIN_QUERY_IMEOUT_MS, TimeUnit.MILLISECONDS);
             }
         } catch (Exception e) {
             // TODO Auto-generated catch block

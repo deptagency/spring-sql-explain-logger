@@ -17,7 +17,6 @@ public class PreparedStetementValue {
     }
 
     public PreparedStetementValue(Object valueToSet, Class<?> parameterType) {
-        this();
         this.value = valueToSet;
         this.parameterType = parameterType;
     }
