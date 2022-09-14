@@ -9,15 +9,24 @@ import java.util.stream.Stream;
 
 import com.deptagency.sqlexplain.execute.ExplainPlanQueryCreator;
 import com.deptagency.sqlexplain.execute.MySqlExplainPlanQueryCreator;
-import com.deptagency.sqlexplain.execute.PostgreSqlExplainPlanQueryCreator;
+import com.deptagency.sqlexplain.execute.PostgreSQLExplainPlanQueryCreator;
+import com.deptagency.sqlexplain.logger.DefaultExplainPlanLogger;
+import com.deptagency.sqlexplain.logger.ExplainPlanLogger;
+import com.deptagency.sqlexplain.logger.PostgreSQLExplainPlanLogger;
 
 public enum DatabaseDialect {
 
     POSTGRESQL("postgresql", true) {
         @Override
         public ExplainPlanQueryCreator getExplainPlanQueryCreator() {
-            return new PostgreSqlExplainPlanQueryCreator();
+            return new PostgreSQLExplainPlanQueryCreator();
         }
+
+        @Override
+        public ExplainPlanLogger getExplainPlanLogger() {
+            return new PostgreSQLExplainPlanLogger();
+         }
+
     },
     ORACLE("oracle", false),
     MYSQL("mysql", true) {
@@ -59,6 +68,10 @@ public enum DatabaseDialect {
     public ExplainPlanQueryCreator getExplainPlanQueryCreator() {
         throw new UnsupportedOperationException(
                 "{} is not currently supported and doesn't have an explain plan query creator");
+    }
+
+    public ExplainPlanLogger getExplainPlanLogger() {
+       return new DefaultExplainPlanLogger();
     }
 
     public static Optional<DatabaseDialect> getDatabaseDialectByURL(String jdbcURL) {

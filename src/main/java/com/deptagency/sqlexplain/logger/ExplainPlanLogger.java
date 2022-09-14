@@ -5,11 +5,8 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
-public class ExplainPlanLogger {
+public interface ExplainPlanLogger {
 
-    public static void logExplainPlanResults(String query, List<Map<String, Object>> results, Logger logger) {
-        //TODO update format
-        logger.info("{\"Query\": \"{}\" ,\"Explain\": {} }", query, results.get(0).get("QUERY PLAN"));
-    }
-
+    public  void logExplainPlanResults(String query, List<Map<String, Object>> results, Logger logger);
+    
 }

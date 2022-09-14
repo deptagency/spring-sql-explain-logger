@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.deptagency.sqlexplain.PreparedStetementValue;
 import com.deptagency.sqlexplain.execute.ExplainPlanExecutor;
 import com.deptagency.sqlexplain.execute.ExplainPlanQueryCreator;
-import com.deptagency.sqlexplain.logger.ExplainPlanLogger;
+import com.deptagency.sqlexplain.logger.DefaultExplainPlanLogger;
 
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
@@ -87,7 +87,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
                                         .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
 
                                 // Log results if present
-                                queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
+                                queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger().logExplainPlanResults(queryInfo.getQuery(),
                                         results, logger));
                             } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
                                 // Execute Explain Plan
@@ -96,7 +96,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
                                 // TODO better resutls formatting (posibbly move formating to logger class)
                                 // Log results if present
-                                queryResults.ifPresent(results -> ExplainPlanLogger.logExplainPlanResults(queryInfo.getQuery(),
+                                queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger().logExplainPlanResults(queryInfo.getQuery(),
                                         results, logger));
                             }
                     }

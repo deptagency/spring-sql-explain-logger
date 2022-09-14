@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostgreSqlExplainPlanQueryCreator implements ExplainPlanQueryCreator {
+public class PostgreSQLExplainPlanQueryCreator implements ExplainPlanQueryCreator {
 
-  Logger logger = LoggerFactory.getLogger(PostgreSqlExplainPlanQueryCreator.class);
+  Logger logger = LoggerFactory.getLogger(PostgreSQLExplainPlanQueryCreator.class);
 
-  public PostgreSqlExplainPlanQueryCreator() {
+  public PostgreSQLExplainPlanQueryCreator() {
 
   }
   
