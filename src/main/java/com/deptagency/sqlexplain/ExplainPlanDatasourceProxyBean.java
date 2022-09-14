@@ -31,7 +31,13 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
     // TODO change to a better option to look at the datasource itself instead of
     // relying on the config property
     @Value("${spring.datasource.url:null}")
-    private String jdbcURL;
+    private String jdbcURL = null;
+
+    @Value("${com.deptagency.sqlexplain.max_cache_size:50}")
+    private Integer maxCacheSize  = null;
+
+    @Value("${com.deptagency.sqlexplain.query_cache_expiry:30}")
+    private Integer queryCacheExpiry  = null;
 
     @Override
     public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException {
@@ -46,7 +52,7 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
             if (dbDialect.isPresent() && dbDialect.get().isSupported()) {
                 ProxyFactory factory = new ProxyFactory(bean);
                 factory.setProxyTargetClass(true);
-                factory.addAdvice(new ProxyDataSourceInterceptor((DataSource) bean, dbDialect.get()));
+                factory.addAdvice(new ProxyDataSourceInterceptor((DataSource) bean, dbDialect.get(), maxCacheSize, queryCacheExpiry));
                 return factory.getProxy();
             } else {
                 logger.warn("WARN database is not currently supported. Currently supported databases include {} ",
@@ -59,12 +65,12 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
     private static class ProxyDataSourceInterceptor implements MethodInterceptor {
         private final DataSource dataSource;
 
-        public ProxyDataSourceInterceptor(final DataSource dataSource, final DatabaseDialect dialect) {
+        public ProxyDataSourceInterceptor(final DataSource dataSource, final DatabaseDialect dialect, final Integer maxCacheSize, final Integer queryCacheExpiry) {
             super();
             this.dataSource = ProxyDataSourceBuilder.create(dataSource)
                     // .countQuery()
                     // .logQueryBySlf4j(SLF4JLogLevel.INFO)
-                    .listener(new LogExplainPlanQueryListener(dialect))
+                    .listener(new LogExplainPlanQueryListener(dialect, maxCacheSize, queryCacheExpiry))
                     .build();
         }
 

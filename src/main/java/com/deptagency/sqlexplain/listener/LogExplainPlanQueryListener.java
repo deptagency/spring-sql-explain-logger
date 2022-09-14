@@ -28,12 +28,11 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     private final Integer EXPLAIN_QUERY_IMEOUT_MS = 500;
 
-    // TODO make these configurable
-    private final Integer QUERY_EXPIRY_MINS = 5;
+    private final Integer maxCacheSize;
 
-    private final Integer MAX_CACHED_QUERY_SIZE = 50;
+    private final Integer queryCacheExpiry;
 
-    private final SQLQueriesCache SQL_QUERIES = new SQLQueriesCache(MAX_CACHED_QUERY_SIZE, QUERY_EXPIRY_MINS);
+    private final SQLQueriesCache SQL_QUERIES;
 
     public List<QueryType> SUPPORTED_QUERY_TYPES = new ArrayList<QueryType>() {
         {
@@ -43,8 +42,24 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     protected DatabaseDialect databaseDialect;
 
+    /**
+     * Uses default values for maxQuerySize and queryExpiration
+     * @param databaseDialect - The dabase dialect i.e MySQL, postgreSQL etc
+    */
     public LogExplainPlanQueryListener(DatabaseDialect databaseDialect) {
+        this(databaseDialect, null, null);
+    }
+
+    /**
+     * @param databaseDialect - The dabase dialect i.e MySQL, postgreSQL etc
+     * @param maxQuerySize - The total number of queries to keep in cache used to determine if an explain plan has been run recently for a query
+     * @param queryExpiration - The period between when an explain plan for a query should be run again
+     */
+    public LogExplainPlanQueryListener(DatabaseDialect databaseDialect, Integer maxCacheSize, Integer queryExpiration) {
         this.databaseDialect = databaseDialect;
+        this.maxCacheSize = maxCacheSize;
+        this.queryCacheExpiry = queryExpiration;
+        SQL_QUERIES = new SQLQueriesCache(this.maxCacheSize, this.queryCacheExpiry);
     }
 
     /**
@@ -53,8 +68,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
      */
     @Override
     public void beforeQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
-        // TODO Auto-generated method stub
-
+        //Do Nothing
     }
 
     /**
@@ -92,7 +106,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
                         databaseDialect.getExplainPlanLogger()
                                 .logExplainPlanResults(queryInfo.getQuery(),
                                 queryResults, logger);
-                                
+
                     } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
                         // Execute Explain Plan
                         List<Map<String, Object>>  queryResults = new ExplainPlanExecutor()
@@ -107,7 +121,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
                 }
             } catch (Exception ex) {
                 //Catch Exception and just log it at this stage
-                logger.error("Error running explain plan {} ", ex);
+                logger.error("Error running explain plan", ex);
             }
         }).orTimeout(EXPLAIN_QUERY_IMEOUT_MS, TimeUnit.MILLISECONDS);
     }
