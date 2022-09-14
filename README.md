@@ -1,7 +1,41 @@
-# DEPT SQL Explain
-SQL explain is an interceptor that outputs explain plans for sql queries.
+I am sure we have been in this baot. You add a query to an application which seems fairly simple without much worry of its performance implication. You deploy the application to production and even for a given period everything is going smooth until all of a sudden one day the application starts to run into performance issues. This then involves triaging, collecting and analyzing metrics to finally determine that the supposedly inoquous query is the culprit because it was doing a table scan on a table that kept increasing in size. Adding an index to the rescue.
 
-## Example Output
+What if you could have a way to catch the issue before it turns into a production issue. This was the motivation for creating the SQL Explain library. The library intercepts sql calls and executes an explain and logs the results. The results can then be monitored for potential issues from queries that have sub optimal queries.
+
+At first it appeared simple enough especially for applications that use hibernate. We could easily get the SQL query of the prepared statement that Hibernate was executing. Then we started to look for a way to get the prepared statement bind parameters so we could execute the expalin plan query. That turned into a much harder problem. Neither Hibernate nor JDBC API provided an easy way to get the parameters. One of the solutions we explored was proxying the Datasource and intercepting JDBC calls but we wanted the proxy to be as least intrusive as possible and easy to enable and disable per environment. Spring BeanPostProcessor has a great way of accomplishing this (add thx to xxx where we saw the solution). You can intercept any bean during creation and add a proxy and you can also make the proxy conditional based on a configuration property.
+
+```java
+
+@Component
+@ConditionalOnProperty(value = "com.deptagency.sqlexplain.enabled", havingValue = "true")
+public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
+
+......
+
+@Override
+    public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
+        if (bean instanceof DataSource) {
+            Optional<DatabaseDialect> dbDialect = DatabaseDialect.getDatabaseDialectByURL(jdbcURL);
+
+            if (dbDialect.isPresent() && dbDialect.get().isSupported()) {
+                ProxyFactory factory = new ProxyFactory(bean);
+                factory.setProxyTargetClass(true);
+                factory.addAdvice(new ProxyDataSourceInterceptor((DataSource) bean, dbDialect.get()));
+                return factory.getProxy();
+            } else {
+                logger.warn("WARN database is not currently supported. Currently supported databases include {} ",
+                        DatabaseDialect.getSupportedDatabases());
+            }
+        }
+        return bean;
+    }
+
+.......
+}
+
+```
+
+## Example Output - PostgreSQL
 
 ```json
 {

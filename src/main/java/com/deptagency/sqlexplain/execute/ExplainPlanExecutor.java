@@ -21,66 +21,59 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
 
   private static ApplicationContext applicationContext;
 
-  
-  /** 
+  /**
    * Run explain plan for a query and return the results
-   * The results will be mapped to a List (one entry for each row) of Maps (one entry for each column using the column name as the key).
+   * The results will be mapped to a List (one entry for each row) of Maps (one
+   * entry for each column using the column name as the key).
+   * 
    * @param query to run explian plan for
    * @return Optional<List<String>> Explain plan results
    */
-  public Optional<List<Map<String, Object>>> executeExplainPlan(final String query, final ExplainPlanQueryCreator queryCreator) {
+  public Optional<List<Map<String, Object>>> executeExplainPlan(final String query,
+      final ExplainPlanQueryCreator queryCreator) {
 
     List<Map<String, Object>> results = null;
-    try {
 
-      // TODO add logic to only run explain plan per query periodically
-      String explainQuery = queryCreator.getExlainPlanQuery(query);
+    // TODO add logic to only run explain plan per query periodically
+    String explainQuery = queryCreator.getExlainPlanQuery(query);
 
-      JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
+    JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
-      results = jdbcTemplate.queryForList(explainQuery);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    results = jdbcTemplate.queryForList(explainQuery);
+
     return Optional.ofNullable(results);
   }
 
-
-  
-  /** 
+  /**
    * 
    * Run explain plan for a prepared statement query and return the results
-   * The results will be mapped to a List (one entry for each row) of Maps (one entry for each column using the column name as the key).
+   * The results will be mapped to a List (one entry for each row) of Maps (one
+   * entry for each column using the column name as the key).
    * 
-   * @param query to run explian plan for
+   * @param query                   to run explian plan for
    * @param preparedStetementValues parameter values for prepared statement
    * @return Optional<List<Map<String, Object>>> Explain plan results
    */
   public Optional<List<Map<String, Object>>> executeExplainPlan(final String query,
-      final List<PreparedStetementValue> preparedStetementValues, final ExplainPlanQueryCreator queryCreator ) {
+      final List<PreparedStetementValue> preparedStetementValues, final ExplainPlanQueryCreator queryCreator) {
 
     List<Map<String, Object>> results = null;
-    try {
-      //TODO find another way to get bean if possible
-      JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
+    // TODO find another way to get bean if possible
+    JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
-      String explainQuery = queryCreator.getExlainPlanQuery(query);
+    String explainQuery = queryCreator.getExlainPlanQuery(query);
 
-      Object[] args = preparedStetementValues.stream().map(value -> value.getValue()).toArray();
+    Object[] args = preparedStetementValues.stream().map(value -> value.getValue()).toArray();
 
-      results = jdbcTemplate.queryForList(explainQuery, args);
+    results = jdbcTemplate.queryForList(explainQuery, args);
 
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    logger.info("{}", results);
+
     return Optional.ofNullable(results);
 
   }
 
-  
-  /** 
+  /**
    * @param context
    * @throws BeansException
    */
