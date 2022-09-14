@@ -1,8 +1,10 @@
-I am sure we have been in this baot. You add a query to an application which seems fairly simple without much worry of its performance implication. You deploy the application to production and even for a given period everything is going smooth until all of a sudden one day the application starts to run into performance issues. This then involves triaging, collecting and analyzing metrics to finally determine that the supposedly inoquous query is the culprit because it was doing a table scan on a table that kept increasing in size. Adding an index to the rescue.
+# DEPT SQL Explain
+
+I am sure we have all been in this boat. You add a query to an application which seems fairly simple without much worry of its performance implication. You deploy the application to production and even for a given period everything is going smooth until all of a sudden one day the application starts to run into performance issues. This then involves triaging, collecting and analyzing metrics to finally determine that the supposedly inoquous query is the culprit because it was doing a table scan on a table that kept increasing in size. Adding an index to the rescue.
 
 What if you could have a way to catch the issue before it turns into a production issue. This was the motivation for creating the SQL Explain library. The library intercepts sql calls and executes an explain and logs the results. The results can then be monitored for potential issues from queries that have sub optimal queries.
 
-At first it appeared simple enough especially for applications that use hibernate. We could easily get the SQL query of the prepared statement that Hibernate was executing. Then we started to look for a way to get the prepared statement bind parameters so we could execute the expalin plan query. That turned into a much harder problem. Neither Hibernate nor JDBC API provided an easy way to get the parameters. One of the solutions we explored was proxying the Datasource and intercepting JDBC calls but we wanted the proxy to be as least intrusive as possible and easy to enable and disable per environment. Spring BeanPostProcessor has a great way of accomplishing this (add thx to xxx where we saw the solution). You can intercept any bean during creation and add a proxy and you can also make the proxy conditional based on a configuration property.
+At first it appeared simple enough especially for applications that use hibernate. We could easily get the SQL query of the prepared statement that Hibernate was executing. Then we started to look for a way to get the prepared statement bind parameters so we could execute the explain plan query. That turned into a much harder problem. Neither Hibernate nor JDBC API provided an easy way to get the parameters. One of the solutions we explored was proxying the Datasource and intercepting JDBC calls but we wanted the proxy to be as least intrusive as possible and easy to enable and disable per environment. Spring BeanPostProcessor has a great way of accomplishing this (add thx to xxx where we saw the solution). You can intercept any bean during creation and add a proxy and you can also make the proxy conditional based on a configuration property.
 
 ```java
 
@@ -93,7 +95,10 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 } }
 
 ```
-## Maven
+
+## Installation
+
+### Maven
 ```xml
 <dependency>
 	<groupId>com.deptagency</groupId>
@@ -102,11 +107,15 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 </dependency>
 ```
 
-## Configuration
+### Configuration
 Add the config property below and set value to true to enable explain plan logging.
 ```
 com.deptagency.sqlexplain.enabled=true
 ```
+
+## User Guide
+
+Demo app
 
 ## Supported databases
 
