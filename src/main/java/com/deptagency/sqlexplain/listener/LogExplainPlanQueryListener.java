@@ -77,9 +77,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         CompletableFuture.runAsync(() -> {
             try {
                 if (SQL_QUERIES.addQuery(queryInfo.getQuery())) {
-                    Optional<List<Map<String, Object>>> queryResults = null;
                     ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
-
                     if (execInfo.getStatementType() == StatementType.PREPARED) {
 
                         List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
@@ -87,23 +85,24 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
                                 paramList);
 
                         // Execute Explain Plan
-                        queryResults = new ExplainPlanExecutor()
+                        List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
                                 .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
 
-                        // Log results if present
-                        queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger()
+                        // Log results 
+                        databaseDialect.getExplainPlanLogger()
                                 .logExplainPlanResults(queryInfo.getQuery(),
-                                        results, logger));
+                                queryResults, logger);
+                                
                     } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
                         // Execute Explain Plan
-                        queryResults = new ExplainPlanExecutor()
+                        List<Map<String, Object>>  queryResults = new ExplainPlanExecutor()
                                 .executeExplainPlan(queryInfo.getQuery(), queryCreator);
 
                         // TODO better resutls formatting (posibbly move formating to logger class)
-                        // Log results if present
-                        queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger()
+                        // Log results
+                        databaseDialect.getExplainPlanLogger()
                                 .logExplainPlanResults(queryInfo.getQuery(),
-                                        results, logger));
+                                queryResults, logger);
                     }
                 }
             } catch (Exception ex) {

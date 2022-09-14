@@ -29,19 +29,16 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * @param query to run explian plan for
    * @return Optional<List<String>> Explain plan results
    */
-  public Optional<List<Map<String, Object>>> executeExplainPlan(final String query,
-      final ExplainPlanQueryCreator queryCreator) {
+  public List<Map<String, Object>> executeExplainPlan(final String query,
+    final ExplainPlanQueryCreator queryCreator) {
 
-    List<Map<String, Object>> results = null;
-
-    // TODO add logic to only run explain plan per query periodically
     String explainQuery = queryCreator.getExlainPlanQuery(query);
 
     JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
-    results = jdbcTemplate.queryForList(explainQuery);
+    List<Map<String, Object>> results = jdbcTemplate.queryForList(explainQuery);
 
-    return Optional.ofNullable(results);
+    return results;
   }
 
   /**
@@ -54,10 +51,10 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * @param preparedStetementValues parameter values for prepared statement
    * @return Optional<List<Map<String, Object>>> Explain plan results
    */
-  public Optional<List<Map<String, Object>>> executeExplainPlan(final String query,
-      final List<PreparedStetementValue> preparedStetementValues, final ExplainPlanQueryCreator queryCreator) {
+  public List<Map<String, Object>> executeExplainPlan(final String query,
+    
+    final List<PreparedStetementValue> preparedStetementValues, final ExplainPlanQueryCreator queryCreator) {
 
-    List<Map<String, Object>> results = null;
     // TODO find another way to get bean if possible
     JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
@@ -65,9 +62,9 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
 
     Object[] args = preparedStetementValues.stream().map(value -> value.getValue()).toArray();
 
-    results = jdbcTemplate.queryForList(explainQuery, args);
+    List<Map<String, Object>> results = jdbcTemplate.queryForList(explainQuery, args);
 
-    return Optional.ofNullable(results);
+    return results;
 
   }
 
