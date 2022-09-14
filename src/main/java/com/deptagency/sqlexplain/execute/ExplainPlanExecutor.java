@@ -67,8 +67,6 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
 
     results = jdbcTemplate.queryForList(explainQuery, args);
 
-    logger.info("{}", results);
-
     return Optional.ofNullable(results);
 
   }

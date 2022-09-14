@@ -8,10 +8,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.deptagency.sqlexplain.execute.ExplainPlanQueryCreator;
-import com.deptagency.sqlexplain.execute.MySqlExplainPlanQueryCreator;
+import com.deptagency.sqlexplain.execute.MySQLExplainPlanQueryCreator;
 import com.deptagency.sqlexplain.execute.PostgreSQLExplainPlanQueryCreator;
 import com.deptagency.sqlexplain.logger.DefaultExplainPlanLogger;
 import com.deptagency.sqlexplain.logger.ExplainPlanLogger;
+import com.deptagency.sqlexplain.logger.MySQLExplainPlanLogger;
 import com.deptagency.sqlexplain.logger.PostgreSQLExplainPlanLogger;
 
 public enum DatabaseDialect {
@@ -32,8 +33,13 @@ public enum DatabaseDialect {
     MYSQL("mysql", true) {
         @Override
         public ExplainPlanQueryCreator getExplainPlanQueryCreator() {
-            return new MySqlExplainPlanQueryCreator();
+            return new MySQLExplainPlanQueryCreator();
         }
+
+        @Override
+        public ExplainPlanLogger getExplainPlanLogger() {
+            return new MySQLExplainPlanLogger();
+         }
     };
 
     private static final Map<String, DatabaseDialect> DBNAMEMAP = new HashMap<>(values().length, 1);;

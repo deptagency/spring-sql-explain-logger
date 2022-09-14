@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MySqlExplainPlanQueryCreator implements ExplainPlanQueryCreator {
+public class MySQLExplainPlanQueryCreator implements ExplainPlanQueryCreator {
 
-  Logger logger = LoggerFactory.getLogger(MySqlExplainPlanQueryCreator.class);
+  Logger logger = LoggerFactory.getLogger(MySQLExplainPlanQueryCreator.class);
 
-  public MySqlExplainPlanQueryCreator() {
+  public MySQLExplainPlanQueryCreator() {
 
   }
   
@@ -20,7 +20,7 @@ public class MySqlExplainPlanQueryCreator implements ExplainPlanQueryCreator {
    */
   @Override
   public String getExlainPlanQuery(final String query) {
-    String explainQuery = "EXPLAIN " + query;
+    String explainQuery = "EXPLAIN FORMAT=JSON " + query;
     return explainQuery;
   }
 

@@ -35,7 +35,9 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 
 ```
 
-## Example Output - PostgreSQL
+## Example Output
+
+### PostgreSQL
 
 ```json
 {
@@ -58,7 +60,39 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 ]
 }
 ```
+### MySQL
 
+```json
+
+{"Query": "select customer0_.id as id1_0_, customer0_.first_name as first_na2_0_, customer0_.last_name as last_nam3_0_ from customer customer0_ where customer0_.last_name=?" ,"Explain": {
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "0.95"
+    },
+    "table": {
+      "table_name": "customer0_",
+      "access_type": "ALL",
+      "rows_examined_per_scan": 7,
+      "rows_produced_per_join": 0,
+      "filtered": "14.29",
+      "cost_info": {
+        "read_cost": "0.85",
+        "eval_cost": "0.10",
+        "prefix_cost": "0.95",
+        "data_read_per_join": "367"
+      },
+      "used_columns": [
+        "id",
+        "first_name",
+        "last_name"
+      ],
+      "attached_condition": "(`sql_explain`.`customer0_`.`last_name` = 'test_save')"
+    }
+  }
+} }
+
+```
 ## Maven
 ```xml
 <dependency>
