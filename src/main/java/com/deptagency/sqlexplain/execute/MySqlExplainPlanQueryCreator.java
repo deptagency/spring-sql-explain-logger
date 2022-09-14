@@ -19,7 +19,7 @@ public class MySqlExplainPlanQueryCreator implements ExplainPlanQueryCreator {
    * @return String the explain plan query
    */
   @Override
-  public String getExlainPlanQuery(String query) {
+  public String getExlainPlanQuery(final String query) {
     String explainQuery = "EXPLAIN " + query;
     return explainQuery;
   }

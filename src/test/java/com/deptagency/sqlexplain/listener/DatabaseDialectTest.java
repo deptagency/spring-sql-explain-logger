@@ -50,6 +50,6 @@ public class DatabaseDialectTest {
 
         Optional<DatabaseDialect> db = DatabaseDialect.getDatabaseDialectByURL("jdbc:xxx://localhost");
 
-        assertFalse(db.isPresent(), "Should return empty");
+        assertFalse(db.isPresent(), "Should return empty for urecognized DB");
 	}
 }

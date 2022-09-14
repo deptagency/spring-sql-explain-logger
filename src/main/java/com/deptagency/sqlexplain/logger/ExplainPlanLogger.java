@@ -9,8 +9,7 @@ public class ExplainPlanLogger {
 
     public static void logExplainPlanResults(String query, List<Map<String, Object>> results, Logger logger) {
         //TODO update format
-        logger.info("{\"Query\": \"{}\"  }", query);
-        logger.info("{}",results.get(0).get("QUERY PLAN"));
+        logger.info("{\"Query\": \"{}\" ,\"Explain\": {} }", query, results.get(0).get("QUERY PLAN"));
     }
 
 }

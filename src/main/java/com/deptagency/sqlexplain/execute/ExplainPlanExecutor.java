@@ -28,7 +28,7 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * @param query to run explian plan for
    * @return Optional<List<String>> Explain plan results
    */
-  public Optional<List<Map<String, Object>>> executeExplainPlan(String query, ExplainPlanQueryCreator queryCreator) {
+  public Optional<List<Map<String, Object>>> executeExplainPlan(final String query, final ExplainPlanQueryCreator queryCreator) {
 
     List<Map<String, Object>> results = null;
     try {
@@ -57,8 +57,8 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * @param preparedStetementValues parameter values for prepared statement
    * @return Optional<List<Map<String, Object>>> Explain plan results
    */
-  public Optional<List<Map<String, Object>>> executeExplainPlan(String query,
-      List<PreparedStetementValue> preparedStetementValues, ExplainPlanQueryCreator queryCreator ) {
+  public Optional<List<Map<String, Object>>> executeExplainPlan(final String query,
+      final List<PreparedStetementValue> preparedStetementValues, final ExplainPlanQueryCreator queryCreator ) {
 
     List<Map<String, Object>> results = null;
     try {
