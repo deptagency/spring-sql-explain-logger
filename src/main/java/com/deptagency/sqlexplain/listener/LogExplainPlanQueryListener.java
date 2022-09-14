@@ -7,14 +7,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.hibernate.dialect.DB2Dialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.deptagency.sqlexplain.PreparedStetementValue;
 import com.deptagency.sqlexplain.execute.ExplainPlanExecutor;
 import com.deptagency.sqlexplain.execute.ExplainPlanQueryCreator;
-import com.deptagency.sqlexplain.logger.DefaultExplainPlanLogger;
 
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
@@ -69,46 +67,50 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
     public void afterQuery(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
         QueryInfo queryInfo = queryInfoList.get(0);
         if (isQueryTypeSupported(queryInfo.getQuery())) {
-            // TODO check performance and resource implications of using completable future
-            // and also handling exceptions
-            CompletableFuture.runAsync(() -> {
-                try {
-                    if (SQL_QUERIES.addQuery(queryInfo.getQuery())) {
-                        Optional<List<Map<String, Object>>> queryResults = null;
-                        ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
-
-                        if (execInfo.getStatementType() == StatementType.PREPARED) {
-
-                            List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
-                            List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(
-                                    paramList);
-
-                            // Execute Explain Plan
-                            queryResults = new ExplainPlanExecutor()
-                                    .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
-
-                            // Log results if present
-                            queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger()
-                                    .logExplainPlanResults(queryInfo.getQuery(),
-                                            results, logger));
-                        } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
-                            // Execute Explain Plan
-                            queryResults = new ExplainPlanExecutor()
-                                    .executeExplainPlan(queryInfo.getQuery(), queryCreator);
-
-                            // TODO better resutls formatting (posibbly move formating to logger class)
-                            // Log results if present
-                            queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger()
-                                    .logExplainPlanResults(queryInfo.getQuery(),
-                                            results, logger));
-                        }
-                    }
-                } catch (Exception ex) {
-                    //Catch Exception and just log it at this stage
-                    logger.error("Error running explain plan {} ", ex);
-                }
-            }).orTimeout(EXPLAIN_QUERY_IMEOUT_MS, TimeUnit.MILLISECONDS);
+            runExplainPlanAndLogResults(execInfo, queryInfoList, queryInfo);
         }
+    }
+
+    private void runExplainPlanAndLogResults(ExecutionInfo execInfo, List<QueryInfo> queryInfoList, QueryInfo queryInfo) {
+        // TODO check performance and resource implications of using completable future
+        // and also handling exceptions
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (SQL_QUERIES.addQuery(queryInfo.getQuery())) {
+                    Optional<List<Map<String, Object>>> queryResults = null;
+                    ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
+
+                    if (execInfo.getStatementType() == StatementType.PREPARED) {
+
+                        List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
+                        List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(
+                                paramList);
+
+                        // Execute Explain Plan
+                        queryResults = new ExplainPlanExecutor()
+                                .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
+
+                        // Log results if present
+                        queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger()
+                                .logExplainPlanResults(queryInfo.getQuery(),
+                                        results, logger));
+                    } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
+                        // Execute Explain Plan
+                        queryResults = new ExplainPlanExecutor()
+                                .executeExplainPlan(queryInfo.getQuery(), queryCreator);
+
+                        // TODO better resutls formatting (posibbly move formating to logger class)
+                        // Log results if present
+                        queryResults.ifPresent(results -> databaseDialect.getExplainPlanLogger()
+                                .logExplainPlanResults(queryInfo.getQuery(),
+                                        results, logger));
+                    }
+                }
+            } catch (Exception ex) {
+                //Catch Exception and just log it at this stage
+                logger.error("Error running explain plan {} ", ex);
+            }
+        }).orTimeout(EXPLAIN_QUERY_IMEOUT_MS, TimeUnit.MILLISECONDS);
     }
 
     /**
