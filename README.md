@@ -113,6 +113,11 @@ Add the config property below and set value to true to enable explain plan loggi
 com.deptagency.sqlexplain.enabled=true
 ```
 
+Add component scan for the package. Ex.
+```
+@ComponentScan("com.deptagency.sqlexplain")
+```
+
 ## User Guide
 
 Demo app
