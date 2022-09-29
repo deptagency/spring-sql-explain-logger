@@ -89,39 +89,34 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         // TODO check performance and resource implications of using completable future
         // and also handling exceptions
         CompletableFuture.runAsync(() -> {
-            try {
-                if (SQL_QUERIES.addQuery(queryInfo.getQuery())) {
-                    ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
-                    if (execInfo.getStatementType() == StatementType.PREPARED) {
+            if (SQL_QUERIES.addQuery(queryInfo.getQuery())) {
+                ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
+                if (execInfo.getStatementType() == StatementType.PREPARED) {
 
-                        List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
-                        List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(
-                                paramList);
+                    List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
+                    List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(
+                            paramList);
 
-                        // Execute Explain Plan
-                        List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
-                                .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
+                    // Execute Explain Plan
+                    List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
+                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
 
-                        // Log results 
-                        databaseDialect.getExplainPlanLogger()
-                                .logExplainPlanResults(queryInfo.getQuery(),
-                                queryResults, logger);
+                    // Log results
+                    databaseDialect.getExplainPlanLogger()
+                            .logExplainPlanResults(queryInfo.getQuery(),
+                            queryResults, logger);
 
-                    } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
-                        // Execute Explain Plan
-                        List<Map<String, Object>>  queryResults = new ExplainPlanExecutor()
-                                .executeExplainPlan(queryInfo.getQuery(), queryCreator);
+                } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
+                    // Execute Explain Plan
+                    List<Map<String, Object>>  queryResults = new ExplainPlanExecutor()
+                            .executeExplainPlan(queryInfo.getQuery(), queryCreator);
 
-                        // TODO better resutls formatting (posibbly move formating to logger class)
-                        // Log results
-                        databaseDialect.getExplainPlanLogger()
-                                .logExplainPlanResults(queryInfo.getQuery(),
-                                queryResults, logger);
-                    }
+                    // TODO better resutls formatting (posibbly move formating to logger class)
+                    // Log results
+                    databaseDialect.getExplainPlanLogger()
+                            .logExplainPlanResults(queryInfo.getQuery(),
+                            queryResults, logger);
                 }
-            } catch (Exception ex) {
-                //Catch Exception and just log it at this stage
-                logger.error("Error running explain plan", ex);
             }
         }).orTimeout(EXPLAIN_QUERY_IMEOUT_MS, TimeUnit.MILLISECONDS);
     }
@@ -144,7 +139,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
     protected List<PreparedStetementValue> getPreparedStatementValues(List<ParameterSetOperation> params) {
         List<PreparedStetementValue> paramValues = new ArrayList<PreparedStetementValue>();
         for (ParameterSetOperation param : params) {
-            // TODO add checks for array values existense
+            // TODO add checks for array values existence
             paramValues.add(new PreparedStetementValue(param.getArgs()[1], param.getMethod().getParameterTypes()[1]));
         }
         return paramValues;
