@@ -1,45 +1,13 @@
-# DEPT SQL Explain
+# Spring Boot SQL Explain Logger
 
-I am sure we have all been in this boat. You add a query to an application which seems fairly simple without much worry of its performance implication. You deploy the application to production and even for a given period everything is going smooth until all of a sudden one day the application starts to run into performance issues. This then involves triaging, collecting and analyzing metrics to finally determine that the supposedly inoquous query is the culprit because it was doing a table scan on a table that kept increasing in size. Adding an index to the rescue.
+We created this library for Spring Boot applications so you can automatically execute an explain plan for all your queries and log the results. The results can then be monitored for potential issues from queries that have suboptimal queries.  This will allow you to fix bad queries right away in local development environments or test environments.  We don’t recommend using this in production, of course!
 
-What if you could have a way to catch the issue before it turns into a production issue. This was the motivation for creating the SQL Explain library. The library intercepts sql calls and executes an explain and logs the results. The results can then be monitored for potential issues from queries that have sub optimal queries.
+We put it into JSON so it’s parseable by logging tools like Splunk.  Once configured, this is what the logging output looks like …
 
-At first it appeared simple enough especially for applications that use hibernate. We could easily get the SQL query of the prepared statement that Hibernate was executing. Then we started to look for a way to get the prepared statement bind parameters so we could execute the explain plan query. That turned into a much harder problem. Neither Hibernate nor JDBC API provided an easy way to get the parameters. One of the solutions we explored was proxying the Datasource and intercepting JDBC calls but we wanted the proxy to be as least intrusive as possible and easy to enable and disable per environment. Spring BeanPostProcessor has a great way of accomplishing this (add thx to xxx where we saw the solution). You can intercept any bean during creation and add a proxy and you can also make the proxy conditional based on a configuration property.
 
-```java
 
-@Component
-@ConditionalOnProperty(value = "com.deptagency.sqlexplain.enabled", havingValue = "true")
-public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 
-......
-
-@Override
-    public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
-        if (bean instanceof DataSource) {
-            Optional<DatabaseDialect> dbDialect = DatabaseDialect.getDatabaseDialectByURL(jdbcURL);
-
-            if (dbDialect.isPresent() && dbDialect.get().isSupported()) {
-                ProxyFactory factory = new ProxyFactory(bean);
-                factory.setProxyTargetClass(true);
-                factory.addAdvice(new ProxyDataSourceInterceptor((DataSource) bean, dbDialect.get()));
-                return factory.getProxy();
-            } else {
-                logger.warn("WARN database is not currently supported. Currently supported databases include {} ",
-                        DatabaseDialect.getSupportedDatabases());
-            }
-        }
-        return bean;
-    }
-
-.......
-}
-
-```
-
-## Example Output
-
-### PostgreSQL
+… For PostgreSQL
 
 ```json
 {
@@ -62,7 +30,7 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 ]
 }
 ```
-### MySQL
+And for MySQL..
 
 ```json
 
@@ -94,11 +62,11 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
   }
 } }
 
-```
+# How To Use It
 
-## Installation
+You can install it from the Maven central repo by adding this repository to your Maven/Gradle configs:
 
-### Maven
+pom.xml
 ```xml
 <dependency>
 	<groupId>com.deptagency</groupId>
@@ -107,22 +75,27 @@ public class ExplainPlanDatasourceProxyBean implements BeanPostProcessor {
 </dependency>
 ```
 
-### Configuration
-Add the config property below and set value to true to enable explain plan logging.
+Or Gradleconfig;
+TODO
+
+Then, add the config property below wherever you usually set your application properties (for example src/main/resources/application.properties) and set value to true to enable explain plan logging
+
 ```
 com.deptagency.sqlexplain.enabled=true
 ```
 
-Add component scan for the package. Ex.
+Finally, add a component scan for the package. Ex.
 ```
 @ComponentScan("com.deptagency.sqlexplain")
 ```
 
-## User Guide
+# Limitations
 
-Demo app
+Right now, the library only supports PostgreSQL and MySQL and you must be running a Spring Boot app
 
-## Supported databases
+# TODO's
 
-- PostgreSQL
-- MySQL
+[ ] Publish to Maven Central repo
+[ ] Allow customization of logging levels for different types of scans.  I.e. Only log table scans at WARN level.
+[ ] Allow a shorter version of the output when you just want to identify table scans (right now the output can get long!)
+[ ] Add Oracle support
