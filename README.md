@@ -61,12 +61,12 @@ And for MySQL..
     }
   }
 } }
+```
 
 # How To Use It
 
 You can install it from the Maven central repo by adding this repository to your Maven/Gradle configs:
 
-pom.xml
 ```xml
 <dependency>
 	<groupId>com.deptagency</groupId>
