@@ -3,14 +3,13 @@ package com.deptagency.sqlexplain.listener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.deptagency.sqlexplain.PreparedStetementValue;
+import com.deptagency.sqlexplain.PreparedStatementValue;
 import com.deptagency.sqlexplain.execute.ExplainPlanExecutor;
 import com.deptagency.sqlexplain.execute.ExplainPlanQueryCreator;
 
@@ -94,12 +93,12 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
                 if (execInfo.getStatementType() == StatementType.PREPARED) {
 
                     List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
-                    List<PreparedStetementValue> preparedStetementValues = getPreparedStatementValues(
+                    List<PreparedStatementValue> preparedStatementValues = getPreparedStatementValues(
                             paramList);
 
                     // Execute Explain Plan
                     List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
-                            .executeExplainPlan(queryInfo.getQuery(), preparedStetementValues, queryCreator);
+                            .executeExplainPlan(queryInfo.getQuery(), preparedStatementValues, queryCreator);
 
                     // Log results
                     databaseDialect.getExplainPlanLogger()
@@ -136,11 +135,11 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
      * @param params
      * @return List<PreparedStetementValue>
      */
-    protected List<PreparedStetementValue> getPreparedStatementValues(List<ParameterSetOperation> params) {
-        List<PreparedStetementValue> paramValues = new ArrayList<PreparedStetementValue>();
+    protected List<PreparedStatementValue> getPreparedStatementValues(List<ParameterSetOperation> params) {
+        List<PreparedStatementValue> paramValues = new ArrayList<PreparedStatementValue>();
         for (ParameterSetOperation param : params) {
             // TODO add checks for array values existence
-            paramValues.add(new PreparedStetementValue(param.getArgs()[1], param.getMethod().getParameterTypes()[1]));
+            paramValues.add(new PreparedStatementValue(param.getArgs()[1], param.getMethod().getParameterTypes()[1]));
         }
         return paramValues;
     }

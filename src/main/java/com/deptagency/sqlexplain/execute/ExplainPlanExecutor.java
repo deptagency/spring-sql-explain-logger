@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.deptagency.sqlexplain.PreparedStetementValue;
+import com.deptagency.sqlexplain.PreparedStatementValue;
 
 @Component
 public class ExplainPlanExecutor implements ApplicationContextAware {
@@ -31,7 +31,7 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
   public List<Map<String, Object>> executeExplainPlan(final String query,
     final ExplainPlanQueryCreator queryCreator) {
 
-    String explainQuery = queryCreator.getExlainPlanQuery(query);
+    String explainQuery = queryCreator.getExplainPlanQuery(query);
 
     JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
@@ -47,19 +47,19 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * entry for each column using the column name as the key).
    * 
    * @param query                   to run explian plan for
-   * @param preparedStetementValues parameter values for prepared statement
+   * @param preparedStatementValues parameter values for prepared statement
    * @return Optional<List<Map<String, Object>>> Explain plan results
    */
   public List<Map<String, Object>> executeExplainPlan(final String query,
-    
-    final List<PreparedStetementValue> preparedStetementValues, final ExplainPlanQueryCreator queryCreator) {
+
+                                                      final List<PreparedStatementValue> preparedStatementValues, final ExplainPlanQueryCreator queryCreator) {
 
     // TODO find another way to get bean if possible
     JdbcTemplate jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
 
-    String explainQuery = queryCreator.getExlainPlanQuery(query);
+    String explainQuery = queryCreator.getExplainPlanQuery(query);
 
-    Object[] args = preparedStetementValues.stream().map(value -> value.getValue()).toArray();
+    Object[] args = preparedStatementValues.stream().map(value -> value.getValue()).toArray();
 
     List<Map<String, Object>> results = jdbcTemplate.queryForList(explainQuery, args);
 

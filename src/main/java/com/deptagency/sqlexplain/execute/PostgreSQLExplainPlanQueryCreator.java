@@ -19,7 +19,7 @@ public class PostgreSQLExplainPlanQueryCreator implements ExplainPlanQueryCreato
    * @return String the explain plan query
    */
   @Override
-  public String getExlainPlanQuery(final String query) {
+  public String getExplainPlanQuery(final String query) {
     String explainQuery = "EXPLAIN (FORMAT JSON) " + query;
     return explainQuery;
   }

@@ -1,6 +1,6 @@
 package com.deptagency.sqlexplain;
 
-public class PreparedStetementValue {
+public class PreparedStatementValue {
 
     /**
      * Value itself.
@@ -16,12 +16,12 @@ public class PreparedStetementValue {
         this.parameterType = parameterType;
     }
 
-    public PreparedStetementValue(Object valueToSet, Class<?> parameterType) {
+    public PreparedStatementValue(Object valueToSet, Class<?> parameterType) {
         this.value = valueToSet;
         this.parameterType = parameterType;
     }
 
-    public PreparedStetementValue() {
+    public PreparedStatementValue() {
     }
 
     public Object getValue() {
