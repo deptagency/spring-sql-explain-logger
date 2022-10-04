@@ -2,10 +2,7 @@
 
 We created this library for Spring Boot applications so you can automatically execute an explain plan for all your queries and log the results. The results can then be monitored for potential issues from queries that have suboptimal queries.  This will allow you to fix bad queries right away in local development environments or test environments.  We don’t recommend using this in production, of course!
 
-We put it into JSON so it’s parseable by logging tools like Splunk.  Once configured, this is what the logging output looks like …
-
-
-
+We put it into JSON so that it’s parseable by logging tools like Splunk. Once configured, this is what the logging output looks like …
 
 … For PostgreSQL
 
@@ -91,11 +88,11 @@ Finally, add a component scan for the package. Ex.
 
 # Limitations
 
-Right now, the library only supports PostgreSQL and MySQL and you must be running a Spring Boot app
+Right now, the library only supports PostgreSQL and MySQL for a Spring Boot app.
 
 # TODO's
 
-[ ] Publish to Maven Central repo
-[ ] Allow customization of logging levels for different types of scans.  I.e. Only log table scans at WARN level.
-[ ] Allow a shorter version of the output when you just want to identify table scans (right now the output can get long!)
-[ ] Add Oracle support
+- [ ] Publish to Maven Central repo
+- [ ] Allow customization of logging levels for different types of scans.  I.e. Only log table scans at WARN level.
+- [ ] Allow a shorter version of the output when you just want to identify table scans (right now the output can get long!)
+- [ ] Add Oracle support
