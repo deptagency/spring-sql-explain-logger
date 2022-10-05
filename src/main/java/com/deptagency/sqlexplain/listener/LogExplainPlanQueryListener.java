@@ -1,10 +1,10 @@
 package com.deptagency.sqlexplain.listener;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     Logger logger = LoggerFactory.getLogger(LogExplainPlanQueryListener.class);
 
-    private final Integer EXPLAIN_QUERY_IMEOUT_MS = 500;
+    private static final Integer EXPLAIN_QUERY_TIMEOUT_MS = 500;
 
     private final Integer maxCacheSize;
 
@@ -39,6 +39,8 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         }
     };
 
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     protected DatabaseDialect databaseDialect;
 
     /**
@@ -51,7 +53,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     /**
      * @param databaseDialect - The dabase dialect i.e MySQL, postgreSQL etc
-     * @param maxQuerySize - The total number of queries to keep in cache used to determine if an explain plan has been run recently for a query
+     * @param maxCacheSize - The total number of queries to keep in cache used to determine if an explain plan has been run recently for a query
      * @param queryExpiration - The period between when an explain plan for a query should be run again
      */
     public LogExplainPlanQueryListener(DatabaseDialect databaseDialect, Integer maxCacheSize, Integer queryExpiration) {
@@ -84,40 +86,54 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
         }
     }
 
+    public static <T> CompletableFuture<T> delayedValue(final T value,
+                                                        final Duration delay) {
+        final CompletableFuture<T> result = new CompletableFuture<>();
+        scheduler.schedule(() -> result.complete(value), delay.toMillis(), TimeUnit.MILLISECONDS);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> CompletableFuture<T> withDefault(final CompletableFuture<T> cf,
+                                                       final T defaultValue,
+                                                       final Duration timeout) {
+        return (CompletableFuture<T>) CompletableFuture.anyOf(
+                cf.exceptionally(ignoredException -> defaultValue),
+                delayedValue(defaultValue, timeout));
+    }
+
     private void runExplainPlanAndLogResults(ExecutionInfo execInfo, List<QueryInfo> queryInfoList, QueryInfo queryInfo) {
         // TODO check performance and resource implications of using completable future
         // and also handling exceptions
-        CompletableFuture.runAsync(() -> {
+        scheduler.schedule(() -> {
             if (SQL_QUERIES.addQuery(queryInfo.getQuery())) {
                 ExplainPlanQueryCreator queryCreator = databaseDialect.getExplainPlanQueryCreator();
                 if (execInfo.getStatementType() == StatementType.PREPARED) {
-
-                    List<ParameterSetOperation> paramList = queryInfoList.get(0).getParametersList().get(0);
-                    List<PreparedStatementValue> preparedStatementValues = getPreparedStatementValues(
-                            paramList);
+                    final List<ParameterSetOperation> paramList = queryInfoList
+                            .get(0)
+                            .getParametersList()
+                            .get(0);
+                    final List<PreparedStatementValue> preparedStatementValues = getPreparedStatementValues(paramList);
 
                     // Execute Explain Plan
-                    List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
+                    final List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
                             .executeExplainPlan(queryInfo.getQuery(), preparedStatementValues, queryCreator);
 
                     // Log results
                     databaseDialect.getExplainPlanLogger()
-                            .logExplainPlanResults(queryInfo.getQuery(),
-                            queryResults, logger);
-
+                            .logExplainPlanResults(queryInfo.getQuery(), queryResults, logger);
                 } else if (execInfo.getStatementType() == StatementType.STATEMENT) {
                     // Execute Explain Plan
-                    List<Map<String, Object>>  queryResults = new ExplainPlanExecutor()
+                    final List<Map<String, Object>> queryResults = new ExplainPlanExecutor()
                             .executeExplainPlan(queryInfo.getQuery(), queryCreator);
 
                     // TODO better resutls formatting (posibbly move formating to logger class)
                     // Log results
                     databaseDialect.getExplainPlanLogger()
-                            .logExplainPlanResults(queryInfo.getQuery(),
-                            queryResults, logger);
+                            .logExplainPlanResults(queryInfo.getQuery(), queryResults, logger);
                 }
             }
-        }).orTimeout(EXPLAIN_QUERY_IMEOUT_MS, TimeUnit.MILLISECONDS);
+        }, EXPLAIN_QUERY_TIMEOUT_MS, TimeUnit.MILLISECONDS);
     }
 
     /**

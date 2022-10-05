@@ -10,14 +10,14 @@ public class SQLQueriesCache {
 
     private final int maxSize;
     private final int expiryPeriod;
-    private ConcurrentHashMap<String, CachedQuery> map;
-    private ConcurrentLinkedQueue<String> queue;
+    private final ConcurrentHashMap<String, CachedQuery> map;
+    private final ConcurrentLinkedQueue<String> queue;
     
     public SQLQueriesCache(final int maxSize, final int expiryPeriod) {
         this.maxSize = maxSize;
         this.expiryPeriod = expiryPeriod;
-        map = new ConcurrentHashMap<String, CachedQuery>(maxSize);
-        queue = new ConcurrentLinkedQueue<String>();
+        this.map = new ConcurrentHashMap<>(maxSize);
+        this.queue = new ConcurrentLinkedQueue<>();
     }
     
 
