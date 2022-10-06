@@ -90,7 +90,7 @@ Finally, add a component scan for the package. Ex.
 
 Right now, the library only supports PostgreSQL and MySQL for a Spring Boot app.
 
-# TODO's
+# TODOs
 
 - [ ] Publish to Maven Central repo
 - [ ] Allow customization of logging levels for different types of scans.  I.e. Only log table scans at WARN level.
