@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "com.deptagency.sqlexplain.enabled",
+    "type": "java.lang.String",
+    "description": "Boolean property true or false if to enable running and logging explain plans for queries'"
+  },
+  {
+    "name": "com.deptagency.sqlexplain.query_cache_expiry",
+    "type": "java.lang.Integer",
+    "description": "The period between when an explain plan for a query should be run again"
+  },
+  {
+    "name": "com.deptagency.sqlexplain.max_cache_size",
+    "type": "java.lang.Integer",
+    "description": "The total number of queries to keep in cache used to determine if an explain plan has been run recently for a query"
+  }
+]}
