@@ -16,10 +16,42 @@ Once uploaded to the release repo, the artifacts will be reviewed & synced to th
 
 ## Commands
 
-To release to the snapshot repo:
+### Nexus Staging Maven Plugin
+
+To release to the snapshot repo, make sure the version ends in `-SNAPSHOT`:
+```bash
+mvn clean deploy
+```
+
+[Read more here](https://central.sonatype.org/publish/publish-maven/#performing-a-snapshot-deployment)
+
+To release to the release repo:
+```bash
+mvn clean deploy -P release
+```
+
+[Read more here](https://central.sonatype.org/publish/publish-maven/#performing-a-release-deployment)
+
+### Maven Release Plugin
+
+Using the Maven release plugin:
+
+```bash
+mvn release:clean release:prepare
+```
+
+Fill in the info for the release.
+
+Then to publish the artifacts, run:
 ```bash
 mvn release:perform
 ```
+
+Since `autoReleaseAfterClose` in the Nexus Staging Maven Plugin is set to false, we have to login to the [Nexus portal](https://s01.oss.sonatype.org/), and close the release in order to finalize it.
+
+Go to `Build Promotions` on the left sidebar, and select `Staging Repositories`.
+
+### Other commands
 
 To upload a file signature (`.asc`) to the snapshot repo:
 ```bash
@@ -43,6 +75,8 @@ When you use `maven-release-plugin` and run `mvn release:perform`, the property 
 - [versions-maven-plugin](https://www.mojohaus.org/versions-maven-plugin/)
   - used for updating pom.xml dep versions
   - `mvn versions:use-latest-releases` updates all deps to latest releases
+- [nexus-staging-maven-plugin](https://github.com/sonatype/nexus-maven-plugins/tree/main/staging/maven-plugin)
+  - made by Sonatype, used for uploading artifacts to Nexus repos
 
 ## Settings
 
