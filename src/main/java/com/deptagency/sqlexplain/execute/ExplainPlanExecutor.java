@@ -25,8 +25,8 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * The results will be mapped to a List (one entry for each row) of Maps (one
    * entry for each column using the column name as the key).
    * 
-   * @param query to run explian plan for
-   * @return Optional<List<String>> Explain plan results
+   * @param query to run explain plan for
+   * @return Explain plan results
    */
   public List<Map<String, Object>> executeExplainPlan(final String query,
     final ExplainPlanQueryCreator queryCreator) {
@@ -46,9 +46,9 @@ public class ExplainPlanExecutor implements ApplicationContextAware {
    * The results will be mapped to a List (one entry for each row) of Maps (one
    * entry for each column using the column name as the key).
    * 
-   * @param query                   to run explian plan for
+   * @param query to run explain plan for
    * @param preparedStatementValues parameter values for prepared statement
-   * @return Optional<List<Map<String, Object>>> Explain plan results
+   * @return Explain plan results
    */
   public List<Map<String, Object>> executeExplainPlan(final String query,
 

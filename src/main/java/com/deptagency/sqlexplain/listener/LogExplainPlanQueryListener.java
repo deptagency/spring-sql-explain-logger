@@ -149,7 +149,7 @@ public class LogExplainPlanQueryListener implements QueryExecutionListener {
 
     /**
      * @param params
-     * @return List<PreparedStetementValue>
+     * @return list of prepared statements
      */
     protected List<PreparedStatementValue> getPreparedStatementValues(List<ParameterSetOperation> params) {
         List<PreparedStatementValue> paramValues = new ArrayList<PreparedStatementValue>();
