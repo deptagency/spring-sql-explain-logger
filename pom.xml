@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.deptagency</groupId>
 	<artifactId>sql-explain</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>sql-explain</name>
 	<description>SQL explain plan metrics</description>
