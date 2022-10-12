@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.deptagency</groupId>
 	<artifactId>spring-sql-explain-logger</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.3</version>
 	<packaging>jar</packaging>
 	<name>spring-sql-explain-logger</name>
 	<description>SQL explain plan metrics</description>
@@ -20,7 +20,7 @@
 		<connection>scm:git:ssh://git@github.com/deptagency/spring-sql-explain-logger.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/deptagency/spring-sql-explain-logger.git</developerConnection>
 		<url>https://github.com/deptagency/spring-sql-explain-logger</url>
-		<tag>v0.0.2</tag>
+		<tag>v0.0.3</tag>
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
